@@ -1,0 +1,5 @@
+%action title,related concrete values
+do finshing,[be part of the community,accept your portion in life, gain higher social recognition]
+a1,[cv1, cv2, cv3, cv4]
+a2,[cv3, cv2, cv5, cv6, cv7]
+a3, [cv8, cv10, cv5, cv1]

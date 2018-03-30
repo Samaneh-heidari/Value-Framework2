@@ -1,10 +1,12 @@
 package mas;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
@@ -12,7 +14,7 @@ import java.util.Vector;
 
 import common.Facility;
 import common.Log;
-import common.Variables;
+import common.FrameworkBuilder;
 import valueFramework.*;
 
 public class HumanAgent {
@@ -20,29 +22,56 @@ public class HumanAgent {
 	private Map<String, RandomTree> valueTrees;
 	private int Id;
 
-	public HumanAgent() {
-		Id = Variables.humanId;
+	/*public HumanAgent() {
+		Id = FrameworkBuilder.humanId;
 		valueTrees = new HashMap<String, RandomTree>();
-		Variables.humanId++;
-		for (int i = 0; i < Variables.numOfAbstractValues; i++)
+		FrameworkBuilder.humanId++;
+		for (int i = 0; i < FrameworkBuilder.numOfAbstractValues; i++)
 			createYourOwnRandomValueTrees();
 		possibleActions = new ArrayList<Action>();
 	}
-
-	private void createYourOwnRandomValueTrees() {
+*/
+	public HumanAgent(int id) {
+//		Id = Variables.humanId;
+		valueTrees = new HashMap<String, RandomTree>();
+		FrameworkBuilder.humanId++;		
+		possibleActions = new ArrayList<Action>();
+	}
+	
+	/*private void createYourOwnRandomValueTrees() {
 		RandomTree tree = new RandomTree();
 		Node root = tree.randomTreeBuilder(5, 3,
-				Integer.toString(Variables.valueNumber));
+				Integer.toString(FrameworkBuilder.valueNumber));
 		System.out.println("****** this is root " + root.getValueName());
 		valueTrees.put(root.getValueName(), tree);
-	}
+	}*/
 
+	/*public RandomTree createValueTrees(List<String> treeInfo) {
+		List<String> items = Arrays.asList(treeInfo.get(0).split("\\s*,\\s*"));//ignore while space after comma
+		//TODO: check the split sql
+		
+		
+		RandomTree tree = new RandomTree();
+		Node root = tree.randomTreeBuilderFromFile(items.get(0), treeInfo);
+		System.out.println("****** this is root " + root.getValueName());
+		valueTrees.put(root.getValueName(), tree);
+		return tree;
+	}*/
+
+	//TODO: now it is the same as global value trees in the FrameworkBuilder. 
+	//But, it can be different for each agent
+	public void createValueTrees(){
+		for(String rootName: FrameworkBuilder.globalValueTrees.keySet()){
+			valueTrees.put(rootName, FrameworkBuilder.globalValueTrees.get(rootName));
+		}
+		
+	}
 	// @SuppressWarnings("unchecked")
 	// @ScheduledMethod(start = 1, interval = 1, shuffle = true)
 	// TODO: call it in a loop in the main function for test
 	public void step() {
 		ArrayList<Action> possibleActions = new ArrayList<Action>();
-		Log.printActions(this.Id, possibleActions);
+//		Log.printActions(this.Id, possibleActions);
 
 		possibleActions = selectPossibleActionsBasedonPerspective();// TODO: for
 																	// now,
@@ -55,25 +84,40 @@ public class HumanAgent {
 																	// possible
 																	// actions
 		ArrayList<RandomTree> relatedAbstractValue = selectAbstractValuesAccordingToActions(possibleActions);
-		Log.printAbstractValues(this.Id, relatedAbstractValue);
+//		Log.printAbstractValues(this.Id, relatedAbstractValue);
 
 		ArrayList<Action> filterdActions = new ArrayList<Action>();
 		filterdActions = (ArrayList<Action>) filterActionsAccordingToTheMostImportantValue(
 				possibleActions, relatedAbstractValue)[0];
-		System.out.println("filteredActions : ");
-		Log.printActions(this.Id, filterdActions);
+//		System.out.println("filteredActions : ");
+//		Log.printActions(this.Id, filterdActions);
 
-		ArrayList<RandomTree> relatedValues = new ArrayList<RandomTree>();
-		relatedValues = (ArrayList<RandomTree>) filterActionsAccordingToTheMostImportantValue(
-				possibleActions, relatedAbstractValue)[1];
-		for (int i = 0; i < relatedValues.size(); i++) {
-			relatedValues.get(i).getWaterTank().increasingLevel();
-		}
+		
+		Object[] shouldChangeType = filterActionsAccordingToTheMostImportantValue(
+				possibleActions, relatedAbstractValue);
+		System.out.println("\n\n@@@@@\tfinal action set : ");
+		ArrayList<Action>selectedActions = (ArrayList<Action>) shouldChangeType[0];
+		RandomTree relatedValues = (RandomTree) shouldChangeType[1];
+		Log.printActions(-1, selectedActions);
 		// TODO: check if it is pointer object and if you use the following code
 		// the result is still the same. I mean by accessing the tree from
 		// valueTrees you still get the updated water tank level
 		// selectedValue.getWaterTank().increaseLevel(levelOfSatisfaction);
-		System.out.println(filterdActions);
+		if(relatedValues!=null)
+			System.out.println("accoring to this value " + relatedValues.getRoot().getValueName());
+		
+		Action pickedAction = pickAnActionRandomly(selectedActions);
+		System.out.println("[[[[[[[[ before increasing level of  " + relatedValues.getRoot().getValueName() + ", level is : "
+				+ relatedValues.getWaterTank().getFilledLevel());
+		relatedValues.getWaterTank().increasingLevel();
+		System.out.println("]]]]]]]] after increasing level of  " + relatedValues.getRoot().getValueName() + ", level is : "
+				+ relatedValues.getWaterTank().getFilledLevel());
+	}
+
+	private Action pickAnActionRandomly(ArrayList<Action> selectedActions) {
+		Random rand = new Random();
+		int idx = rand.nextInt(selectedActions.size() - 1);
+		return selectedActions.get(idx);		
 	}
 
 	private Object[] filterActionsAccordingToTheMostImportantValue(
@@ -95,40 +139,27 @@ public class HumanAgent {
 		System.out.println("prioritized abstract values : "
 				+ selectedValues.size());
 		Log.printAbstractValues(this.Id, prioritizedAbstractValues);
-		double prvPrio = -100;
+		/*double prvPrio = -100;
 		double crrPrio = prioritizedAbstractValues.get(0).getWaterTank()
-				.getPriorityPercentage();
+				.getPriorityPercentage();*/
 		
-		//this part of code considers all priorities in order.
-		/*for (int i = 0; i < selectedValues.size(); i++) {
-			ArrayList<Action> aa = filterActions(possibleActionsSet,
-					selectedValues.get(i));
-			if (aa.size() != 0)
-				returnedValues.add(selectedValues.get(i));
-			for (int j = 0; j < aa.size(); j++)
-				returnedActions.add(aa.get(j));
-			prvPrio = crrPrio;
-			crrPrio = prioritizedAbstractValues.get(i).getWaterTank()
-					.getPriorityPercentage();
-			if (crrPrio != prvPrio) {
-				if (returnedActions.size() != 0)
-					break;
-				else
-					continue;
-			} else
-				continue;
-		}*/
 		
 		//this part of code only considers the highest priority
 		for(RandomTree rt: prioritizedAbstractValues){
 			ArrayList<Action> relatedActions = filterActions(possibleActionsSet, rt);
 			if (relatedActions.size()!=0){
 				returnedValues = rt;
-				returnedActions.addAll(relatedActions);
+				for(Action tmpAct : relatedActions){
+					if(!returnedActions.contains(tmpAct))
+						returnedActions.addAll(relatedActions);
+				}
+				break;			
 			}
 				
 		}
 		
+		System.out.println("\t\t	in filterAction Function : related actions are : ");
+		Log.printActions(-1, returnedActions);
 		Object[] returnedResults = new Object[] { returnedActions,
 				returnedValues };
 		return returnedResults;
@@ -181,9 +212,9 @@ public class HumanAgent {
 	private ArrayList<RandomTree> findAbstractValues(Action action) {
 		ArrayList<Node> absValues = new ArrayList<Node>();
 		ArrayList<RandomTree> rndTrees = new ArrayList<RandomTree>();
-		ArrayList<Object[]> concreteValues = action.getRelatedConcreteValues();
+		ArrayList<Node> concreteValues = action.getRelatedConcreteValues();
 		for (int i = 0; i < concreteValues.size(); i++) {
-			Node crrPrnt = (Node) (concreteValues.get(i))[0];
+			Node crrPrnt = concreteValues.get(i);
 			Node prvPrnt = crrPrnt;
 			while (crrPrnt != null) {
 				prvPrnt = crrPrnt;
@@ -291,7 +322,7 @@ public class HumanAgent {
 
 	private ArrayList<Action> filterActions(ArrayList<Action> possibleActions,
 			RandomTree lowestValue) {
-		// check all the possibleActions that are related to the given value
+		// check all the possibleActions that are related to the given abstract value
 		ArrayList<Action> filteredActions = new ArrayList<Action>();
 		for (int i = 0; i < possibleActions.size(); i++) {
 			int numOfPossitiveContibutedValues = possibleActions.get(i)
@@ -300,6 +331,7 @@ public class HumanAgent {
 			// possibleActions.get(i).checkRalatedValueInValueTree(lowestValue.getRoot(),
 			// false);
 			if (numOfPossitiveContibutedValues != 0) {
+				if(!filteredActions.contains(possibleActions.get(i)))
 				filteredActions.add(possibleActions.get(i));
 			}
 		}

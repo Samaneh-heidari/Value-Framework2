@@ -1,0 +1,10 @@
+action title	related concrete values
+"job fisher"	["Sustain village", "Be part of the community", "Unity with nature"]
+"job captain"	["Sustain village", "Be part of the community", "Unity with nature", "Authority"]
+"job teacher"	["Sustain village", "Be part of the community", "Authority", "Independent"]
+"job factory worker"	["Sustain village", "Be part of the community"]
+"job factory boss"	["Sustain village", "Be part of the community", "authority", "wealth", "independent"]
+"job mayor"	["Sustain village", "Be part of the community", "authority", "wealth", "independent"]
+"job elderly caretaker"	["Sustain village", "Be part of the community", "care for the weak"]
+"job work outside village"	["Freedom", "Independent"]
+"job unemployed"	["Be part of the community"]

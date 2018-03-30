@@ -1,0 +1,25 @@
+%humanid = id
+%[Possible Action list splitted with ,]
+%value tree 1
+%node title, height, [list of children title slplitted by ,]
+%....
+%value tree 2
+%node title, height, [list of children title slplitted by ,]
+%....
+%value tree 3
+%node title, height, [list of children title slplitted by ,]
+%....
+%value tree 4
+%node title, height, [list of children title slplitted by ,]
+%....
+humanid = 1
+value tree 1
+tradition, 3, [respect for tradition, accept your portion in life]
+respect for tradition, 2, [sustainable village, be part of the community]
+sustainable village, 1, []
+be part of the community, 1, []
+accept your portion in life, 2, []
+value tree 2
+...
+value tree 3
+...

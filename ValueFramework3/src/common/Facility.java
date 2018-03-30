@@ -7,6 +7,11 @@ import valueFramework.RandomTree;
 public class Facility {
 	
 	public static ArrayList<RandomTree> sort(ArrayList<RandomTree> whole) {
+		if(whole.size()==0)
+		{
+			System.out.println("the input array to sort is empty");
+			return null;
+		}
         return mergeSort(whole);
     }
  
@@ -15,7 +20,10 @@ public class Facility {
 	    ArrayList<RandomTree> right = new ArrayList<RandomTree>();
 	    int center;
 	 
-	    if (whole.size() == 1) {    
+	    if (whole.size() == 1) {   
+	    	System.out.println("IN SORT FUNCTION :  value "  + whole.get(0).getRoot().getValueName() + ", priority is " + 
+	    			whole.get(0).getWaterTank().getPriorityPercentage() + ", water Level is : " + whole.get(0).getWaterTank().getFilledLevel() +
+	    			", threshold is : " + whole.get(0).getWaterTank().getThreshould());
 	        return whole;
 	    } else {
 	        center = whole.size()/2;

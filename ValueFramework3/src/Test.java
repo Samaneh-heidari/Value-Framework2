@@ -1,10 +1,13 @@
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Random;
 import java.util.TimerTask;
 
-import common.Variables;
+import javax.lang.model.element.VariableElement;
+
+import common.FrameworkBuilder;
 import mas.HumanAgent;
 import valueFramework.Action;
 import valueFramework.RandomTree;
@@ -12,13 +15,12 @@ import valueFramework.WaterTank;
 
 
 public class Test /*extends TimerTask*/{
-
-	public static void main(String [] args){
-		Variables v = new Variables();
-		v.createAction(20);
+	
+	public static void main(String [] args) throws IOException{
+		FrameworkBuilder v = new FrameworkBuilder();
+//		v.createRandomAction(20);
 		
-		HumanAgent h1 = new HumanAgent();
-//		HumanAgent h2 = new HumanAgent();
+/*		HumanAgent h1 = new HumanAgent();
 		//agents can do all the actions
 		ArrayList<HumanAgent> agents = new ArrayList<HumanAgent>();
 		agents.add(h1);
@@ -27,15 +29,6 @@ public class Test /*extends TimerTask*/{
 		assginConcreteValuesToActions();
 		
 		ArrayList<WaterTank> waterTanks = new ArrayList<WaterTank>();
-		/*for(int ha = 0 ; ha < agents.size(); ha++){			
-			Iterator it = agents.get(ha).getValueTrees().entrySet().iterator();
-		    while (it.hasNext()) {
-		        Map.Entry pair = (Map.Entry)it.next();
-		        System.out.println(pair.getKey() + " = " + pair.getValue());
-		        waterTanks.add(((RandomTree)pair.getValue()).getWaterTank());
-		        it.remove(); // avoids a ConcurrentModificationException
-		    }
-		}*/
 		//Weird! after calling it.remove the entry removed from the hashmap!
 		for(int ha = 0 ; ha < agents.size(); ha++){		
 			for (RandomTree value : agents.get(ha).getValueTrees().values()) {				
@@ -44,14 +37,37 @@ public class Test /*extends TimerTask*/{
 		}
 		
 		h1.assignPossibleActions(v.allPossibleActions);
-//		h2.assignPossibleActions(v.allPossibleActions);
+*/
+		//first create value files
+		v.readValueTreeFile();
+		ArrayList<WaterTank> waterTanks = new ArrayList<WaterTank>();
+		//then read actions from file
+		v.readActionsFromFile("inputFiles\\actionList3.txt");
 		
-		theoryTest(100, agents, waterTanks);
+//	v.conncetActionsAndConcreteValues();
+		v.assginRelatedActionsToConcreteValues();
 		
+		HumanAgent h1 = new HumanAgent(1);
+		FrameworkBuilder.humnaAgentList.add(h1);
+		
+		for(HumanAgent ha : FrameworkBuilder.humnaAgentList){	
+			ha.assignPossibleActions(FrameworkBuilder.allPossibleActions);
+		}
+		
+		h1.createValueTrees();
+		
+		for(HumanAgent ha : FrameworkBuilder.humnaAgentList){		
+			for (RandomTree value : ha.getValueTrees().values()) {				        
+				waterTanks.add(value.getWaterTank());
+			}
+		}
+		
+		theoryTest(100, FrameworkBuilder.humnaAgentList, waterTanks);
+		System.out.println("end :)");
 	}
 	
 	public static void assginConcreteValuesToActions() {
-		for(Action act: Variables.allPossibleActions){
+		for(Action act: FrameworkBuilder.allPossibleActions){
 			act.assignRandomConcreteValues();
 		}
 	}
@@ -61,44 +77,14 @@ public class Test /*extends TimerTask*/{
 		int initialSteps = steps;
 		
 		while(steps != 0){
-			
+			System.out.println("--------step " + steps + "----------------");
 			for (HumanAgent ha : agents) {
 				ha.step();
 			}
 			for(WaterTank wt : waterTanks){
 				wt.step();
 			}
-			
-			
-			/*if (debug) { System.out.print("After draining, uni lv: " + t1.getFilledLevel() + ", pwr lv: " + t2.getFilledLevel() + "), "); }
-			Random rand = new Random();
-			if (rand.nextDouble() >= noise){
-				if(t1.getPriorityPercentage() < t2.getPriorityPercentage()) {
-					if (debug) { System.out.println("t1/Universalism gets chosen"); }
-					t1.increasingLevel();
-					numOfUniversalism++;
-				}
-				else if (t1.getPriorityPercentage() > t2.getPriorityPercentage()) {
-					if (debug) { System.out.println("t2/Power gets chosen"); }
-					t2.increasingLevel();
-					numOfPower++;
-				}
-				else{
-					if (rand.nextDouble() > 0.5){
-						if (debug) { System.out.println("t1/Universalism gets chosen"); }
-						t1.increasingLevel();
-						numOfUniversalism++;
-					}
-					else{
-						if (debug) { System.out.println("t2/Power gets chosen"); }
-						t2.increasingLevel();
-						numOfPower++;
-					}
-				}				
-			}
-			if (debug) { System.out.println("after increase uni level : " + t1.getFilledLevel() + ", pwr level : " + t2.getFilledLevel()); }
-			steps --;
-			if (debug) { System.out.println("------------"); }*/
+			steps--;
 		}
 //		System.out.println("Result: #uni: " + numOfUniversalism + ", #power: " + numOfPower);
 	}

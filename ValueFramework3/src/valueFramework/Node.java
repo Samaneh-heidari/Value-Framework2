@@ -27,8 +27,15 @@ public class Node
     
     public void randomlyAssignActions(ArrayList<Action> alist){
     	Collections.shuffle(alist);
-    	int randomNum = ThreadLocalRandom.current().nextInt(0, alist.size());
+    	int randomNum;
+		if(alist.size()!=0){
+    		randomNum = ThreadLocalRandom.current().nextInt(0, alist.size());			
     	relatedActions = new ArrayList<Action>(alist.subList(0, randomNum));
+		}
+		else{
+			relatedActions = null;
+			System.err.println("in randomlyAassingActions, input list is null");
+		}
     	//TODO: check if it works fine
     }
     

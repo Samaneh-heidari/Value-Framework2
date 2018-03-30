@@ -1,4 +1,6 @@
 package valueFramework;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Random;
 
 
@@ -68,10 +70,42 @@ public class WaterTank{
 	    setThresould(threshould);
 	}
 	
-//	TODO: call it in a while loop
+public WaterTank(String waterTankInfo) {
+	
+	
+	List<String> items = Arrays.asList(waterTankInfo.split("\\s*,\\s*"));
+	maxCapacity = Integer.valueOf(items.get(1));
+	minCapacity = Integer.valueOf(items.get(2));
+	maxFilledLevel = Integer.valueOf(items.get(3));
+	minFilledLevel = Integer.valueOf(items.get(4));
+	drainingAmount = Integer.valueOf(items.get(5));
+	minThresould = Integer.valueOf(items.get(6));
+	
+	maxThresould = Integer.valueOf(items.get(7));
+	Random rand = new Random();
+//	int cp = rand.nextInt((maxCapacity - minCapacity) + 1) + minCapacity;
+	int cp = maxCapacity;
+	int fl = rand.nextInt((maxFilledLevel - minFilledLevel) + 1) + minFilledLevel;
+	int tr = rand.nextInt((maxThresould - minThresould) + 1) + minThresould;
+    
+	
+	setCapacity(cp); //TODO:check if the automatic cast from int to double works fine
+    setFilledLevel(fl);
+    setThresould(tr);
+    System.out.println("capacity : " + capacity + ", threshold : " + threshould);
+    setIncreasingAmount(capacity-threshould);
+   setDrainingAmount(drainingAmount);
+   
+	}
+
+	//	TODO: call it in a while loop
 	public void step(){
 		draining();
-		increasingLevel();
+//		increasingLevel();
+		System.out.println("water tank level in each step after draining and increasinglevel :"  );
+		System.out.println("\t filled level = "+ this.getFilledLevel() + 
+				", threshould = " + this.threshould + ", priorityPercentage : " + this.getPriorityPercentage());
+		
 	}
 	
 	public void draining() {		
@@ -81,6 +115,8 @@ public class WaterTank{
 	
 	public void increasingLevel(){//TODO: level of satisfaction?
 		filledLevel = Math.min(capacity, filledLevel + increasingAmount);
+		System.out.println("in water tank increasingLevel : " + filledLevel +
+				", and increasingAmount = " + increasingAmount);
 	}
 	
 	public double getCapacity() {
@@ -108,7 +144,7 @@ public class WaterTank{
 	}
 	
 	public void setIncreasingAmount(double increasingA) {
-		this.threshould = increasingA;
+		this.increasingAmount = increasingA;
 	}
 	
 	public double getIncreasingAmount(){
@@ -117,5 +153,13 @@ public class WaterTank{
 
 	public double getDrainingAmount() {
 		return drainingAmount;
+	}
+
+	public double getThreshould() {
+		return threshould;
+	}
+
+	public void setThreshould(double threshould) {
+		this.threshould = threshould;
 	}
 }
